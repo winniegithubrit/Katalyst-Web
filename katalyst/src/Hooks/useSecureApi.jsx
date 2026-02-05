@@ -37,8 +37,6 @@ const useSecureApi = () => {
       if (apiKey && (endpoint.includes('/Auth/API/Account') || endpoint.includes('/System/API/Branch'))) {
         requestHeaders['ApiKey'] = apiKey;
       }
-
-      // Handle authentication
       if (requiresAuth) {
         const authToken = sessionStorage.getItem('authToken');
         
@@ -48,8 +46,6 @@ const useSecureApi = () => {
         }
         requestHeaders['Authorization'] = `Bearer ${authToken}`;
       }
-      
-      // Prepare request configuration
       const requestConfig = {
         method,
         headers: requestHeaders
@@ -107,7 +103,7 @@ const useSecureApi = () => {
       console.error('API call error:', err);
       setError(err.message || 'An unexpected error occurred');
       if (err.message.includes('Authentication failed')) {
-        console.error('Authentication failed - consider implementing redirect logic');
+        console.error('Authentication failed ');
       }
 
       throw err;

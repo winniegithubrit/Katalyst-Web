@@ -13,6 +13,13 @@ const Login = () => {
   const [showBranchDropdown, setShowBranchDropdown] = useState(false);
   const [loadingBranches, setLoadingBranches] = useState(true);
   const { callApi, loading } = useSecureApi();
+  useEffect(() => {
+    const hasToken = !!sessionStorage.getItem('authToken');
+    
+    if (hasToken) {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [navigate]);
 
   const {
     formData,
@@ -39,6 +46,7 @@ const Login = () => {
 
   const { errors, validateForm } = useFormValidation(formData, validationRules);
   const [language, setLanguage] = useState('en');
+  
   const filteredBranches = useMemo(() => {
     if (!branchSearch.trim()) return branches;
     
@@ -48,6 +56,7 @@ const Login = () => {
       String(branch.OurBranchId).toLowerCase().includes(searchLower)
     );
   }, [branches, branchSearch]);
+  
   const selectedBranchName = useMemo(() => {
     const branch = branches.find(b => b.OurBranchId === formData.selectedBranch);
     return branch ? branch.BranchName : '';
@@ -204,29 +213,29 @@ const Login = () => {
         response?.code === 200; 
 
       if (isSuccess) {
-        const token = response.token || response.user?.token || response.user?.Token;
+        const token = response.token || 
+                     response.user?.token || 
+                     response.user?.Token ||
+                     response.data?.token ||
+                     response.authToken ||
+                     response.accessToken ||
+                     response.access_token;
         
         if (!token) {
-          throw new Error('No authentication token received');
+          throw new Error('No authentication token received from server');
         }
-        
         const cachedBranches = sessionStorage.getItem('branches');
         sessionStorage.clear();
         localStorage.clear();
-        
-        localStorage.setItem('loginResponse', JSON.stringify(response));
-        
-        const selectedBranch = response.branch?.find(b => b.ourBranchId === formData.selectedBranch) || response.branch?.[0];
-        const branchName = selectedBranch?.branchName || '';
-        document.title = `${response.bank?.bankName}[${response.bank?.branchId}-${branchName}][${response.user?.workingDate}][${response.user?.userName}]`;
-        
         sessionStorage.setItem('authToken', token);
+        window.dispatchEvent(new Event('authChange'));
+        localStorage.setItem('loginResponse', JSON.stringify(response));
+        localStorage.setItem('username', formData.username.trim());
         sessionStorage.setItem('userData', JSON.stringify(response.user || response));
         
         if (response.bank) {
           sessionStorage.setItem('bankInfo', JSON.stringify(response.bank));
         }
-        
         const userProfile = {
           ...(response.user || response),
           BankName: response.bank?.bankName,
@@ -234,14 +243,9 @@ const Login = () => {
           BranchId: response.bank?.branchId
         };
         sessionStorage.setItem('userProfile', JSON.stringify(userProfile));
-        
-        localStorage.setItem('isAuthenticated', 'true');
-        localStorage.setItem('username', formData.username.trim());
-        
         if (cachedBranches) {
           sessionStorage.setItem('branches', cachedBranches);
         }
-        
         if (formData.selectedBranch) {
           const selectedBranchData = branches.find(
             branch => branch.OurBranchId === formData.selectedBranch
@@ -250,22 +254,24 @@ const Login = () => {
             sessionStorage.setItem('selectedBranch', JSON.stringify(selectedBranchData));
           }
         }
-
-        toast.success('Login successful!');
-        navigate('/reports');
+        const selectedBranch = response.branch?.find(b => b.ourBranchId === formData.selectedBranch) || response.branch?.[0];
+        const branchName = selectedBranch?.branchName || '';
+        document.title = `${response.bank?.bankName || 'Katalyst'}[${response.bank?.branchId || ''}-${branchName}][${response.user?.workingDate || ''}][${response.user?.userName || formData.username}]`;
+        
+        toast.success('Login successful.');
+        navigate('/dashboard', { replace: true });
       } else {
         throw new Error('Invalid login credentials');
       }
     } catch (err) {
-      console.error('Login error:', err);
-      toast.error('Invalid login credentials');
-      
+      toast.error(err.message || 'Invalid login credentials');
       const cachedBranches = sessionStorage.getItem('branches');
       sessionStorage.clear();
+      localStorage.clear();
+      
       if (cachedBranches) {
         sessionStorage.setItem('branches', cachedBranches);
       }
-      localStorage.clear();
     }
   };
 
@@ -296,7 +302,7 @@ const Login = () => {
         </div>
         <div className="login-welcome">
           <h2 className="login-title">Welcome Back</h2>
-          <p className="login-subtitle">Please sign in</p>
+          <p className="login-subtitle">Please sign in to continue</p>
         </div>
         
         <form onSubmit={handleSubmit} className="login-form">
@@ -411,7 +417,7 @@ const Login = () => {
                 onChange={handleUsernameChange}
                 className={`login-input login-input-uppercase ${errors.username ? 'login-input-error' : ''}`}
                 placeholder="ENTER YOUR USERNAME"
-                disabled={loading || !formData.selectedBranch}
+                disabled={loading || (branches.length > 0 && !formData.selectedBranch)}
               />
               {errors.username && (
                 <p className="text-red-500 text-sm mt-1 font-normal">{errors.username}</p>
@@ -431,7 +437,7 @@ const Login = () => {
                 onChange={handleInputChange}
                 className={`login-input ${errors.password ? 'login-input-error' : ''}`}
                 placeholder="Enter your password"
-                disabled={loading || !formData.selectedBranch}
+                disabled={loading || (branches.length > 0 && !formData.selectedBranch)}
               />
               {errors.password && (
                 <p className="text-red-500 text-sm mt-1 font-normal">{errors.password}</p>
@@ -441,7 +447,7 @@ const Login = () => {
             <div>
               <button
                 type="submit"
-                disabled={loading || loadingBranches || !formData.selectedBranch}
+                disabled={loading || loadingBranches || (branches.length > 0 && !formData.selectedBranch)}
                 className="login-button"
               >
                 {loading ? (
@@ -545,9 +551,17 @@ const Login = () => {
           outline: none;
           background: white;
           box-sizing: border-box;
+          transition: border-color 0.2s;
+        }
+        .login-input:focus {
+          border-color: #3b82f6;
         }
         .login-input::placeholder {
           color: #9ca3af;
+        }
+        .login-input:disabled {
+          background-color: #f9fafb;
+          cursor: not-allowed;
         }
         .login-input-error {
           border-color: #ef4444;
@@ -558,7 +572,7 @@ const Login = () => {
         .login-button {
           width: 100%;
           padding: 0.75rem 1rem;
-          margin-top: 1rem;
+          margin-top: 0.5rem;
           background-color: #4a5568;
           color: white;
           border: none;
@@ -578,8 +592,6 @@ const Login = () => {
           opacity: 0.6;
           cursor: not-allowed;
         }
-
-        /* Explicit icon sizing (prevents giant chevrons like Image 2) */
         .login-chevron {
           width: 16px;
           height: 16px;
@@ -596,8 +608,6 @@ const Login = () => {
           from { transform: rotate(0deg); }
           to { transform: rotate(360deg); }
         }
-
-        /* Keep any SVGs inside card from exploding */
         .login-card svg {
           max-width: 24px;
           max-height: 24px;

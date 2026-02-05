@@ -1,33 +1,31 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FileText, LogOut } from 'lucide-react';
+import { LogOut } from 'lucide-react';
+import { toast } from 'react-toastify';
 
 const Topbar = () => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    localStorage.removeItem('isAuthenticated');
-    localStorage.removeItem('authToken');
     sessionStorage.clear();
-    navigate('/login');
-    window.location.reload();
+    localStorage.clear();
+    window.dispatchEvent(new Event('authChange'));
+    toast.success('Logged out successfully');
+    navigate('/login', { replace: true });
   };
 
   return (
     <header className="admin-topbar">
       <div className="admin-topbar-left">
-        <div className="admin-topbar-brand">
-          <FileText className="admin-topbar-logo" />
-          <span className="admin-topbar-title">Katalyst</span>
-        </div>
+        <h1 className="admin-topbar-title">Katalyst</h1>
       </div>
       <div className="admin-topbar-right">
-        <button
+        <button 
           onClick={handleLogout}
-          className="admin-topbar-logout"
-          aria-label="Logout"
+          className="flex items-center gap-2 px-4 py-2 text-white-700"
+          title="Logout"
         >
-          <LogOut className="admin-topbar-icon" />
+          <LogOut size={18} />
           <span>Logout</span>
         </button>
       </div>

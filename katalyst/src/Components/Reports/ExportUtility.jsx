@@ -860,15 +860,7 @@ export const getAllParametersForReport = (reportData, reportId, submittedFilters
   
   const allParams = reportData.ReportParameter
     .filter(param => {
-      if (param.ModuleId === reportId && param.ItemSection === 'I') {
-        if (reportId === 9966 || reportId === 9962) {
-          if (param.IsHidden === 1 || param.ItemName === 'IsSummary' || param.ItemName === 'isSummary') {
-            return false;
-          }
-        }
-        return true;
-      }
-      return false;
+      return param.ModuleId === reportId && param.ItemSection === 'I' && param.IsHidden !== 1;
     })
     .sort((a, b) => (a.ItemOrder || 0) - (b.ItemOrder || 0));
   

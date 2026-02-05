@@ -90,26 +90,16 @@ const ReportFilterWindow = ({ reportId, reportName, groupName, onClose, onRunRep
         if (reportData && reportData.ReportParameter && Array.isArray(reportData.ReportParameter)) {
           const reportParams = reportData.ReportParameter
             .filter(param => {
-              if (param.ModuleId === reportId && param.ItemSection === 'I') {
-                if (reportId === 9966 || reportId === 9962) {
-                  if (param.IsHidden === 1 || param.ItemName === 'IsSummary' || param.ItemName === 'isSummary') {
-                    return false;
-                  }
-                }
-                return true;
-              }
-              return false;
+              // Simple filter - only check ModuleId and ItemSection
+              return param.ModuleId === reportId && param.ItemSection === 'I';
             })
             .sort((a, b) => (a.ItemOrder || 0) - (b.ItemOrder || 0));
+          
           setParameters(reportParams);
           const initialValues = {};
           const defaultDate = workingDate || new Date().toISOString().split('T')[0];
           
           reportParams.forEach(param => {
-            if ((reportId === 9966 || reportId === 9962) && (param.ItemName === 'IsSummary' || param.ItemName === 'isSummary')) {
-              return;
-            }
-            
             if (param.ItemType === 'CHK') {
               initialValues[param.ItemName] = 0;
             } else if (param.ItemType === 'DAT') {
@@ -120,10 +110,6 @@ const ReportFilterWindow = ({ reportId, reportName, groupName, onClose, onRunRep
               initialValues[param.ItemName] = null; 
             }
           });
-          if (reportId === 9966 || reportId === 9962) {
-            delete initialValues.IsSummary;
-            delete initialValues.isSummary;
-          }
           
           setFilterValues(initialValues);
         } else {
@@ -145,33 +131,11 @@ const ReportFilterWindow = ({ reportId, reportName, groupName, onClose, onRunRep
       loadParameters();
     }
   }, [reportId, reportData, workingDate]);
-  useEffect(() => {
-    if (reportId === 9966 || reportId === 9962) {
-      setFilterValues(prev => {
-        if (prev.IsSummary !== undefined || prev.isSummary !== undefined) {
-          const cleaned = { ...prev };
-          delete cleaned.IsSummary;
-          delete cleaned.isSummary;
-          return cleaned;
-        }
-        return prev;
-      });
-    }
-  }, [reportId]);
-
   const handleInputChange = (paramName, value) => {
-    if ((reportId === 9966 || reportId === 9962) && (paramName === 'IsSummary' || paramName === 'isSummary')) {
-      return;
-    }
-    
-    setFilterValues(prev => {
-      const newValues = { ...prev, [paramName]: value };
-      if (reportId === 9966 || reportId === 9962) {
-        delete newValues.IsSummary;
-        delete newValues.isSummary;
-      }
-      return newValues;
-    });
+    setFilterValues(prev => ({
+      ...prev,
+      [paramName]: value
+    }));
   };
 
   const fetchAutocompleteOptions = async (param, searchValue) => {
@@ -228,7 +192,7 @@ const ReportFilterWindow = ({ reportId, reportName, groupName, onClose, onRunRep
 
   const handleRunReport = () => {
     const missingMandatory = parameters.filter(param => {
-      if (param.IsMandatory === 1) {
+      if (param.IsMandatory === 1 && param.IsHidden !== 1) {
         const value = filterValues[param.ItemName];
         if (param.ItemType === 'CHK') {
           return value === undefined || value === null;
@@ -253,7 +217,8 @@ const ReportFilterWindow = ({ reportId, reportName, groupName, onClose, onRunRep
 
     const cleanedFilters = {};
     parameters.forEach(param => {
-      if ((reportId === 9966 || reportId === 9962) && (param.IsHidden === 1 || param.ItemName === 'IsSummary' || param.ItemName === 'isSummary')) {
+      // Only skip if IsHidden === 1
+      if (param.IsHidden === 1) {
         return;
       }
       
@@ -281,10 +246,6 @@ const ReportFilterWindow = ({ reportId, reportName, groupName, onClose, onRunRep
         }
       }
     });
-    if (reportId === 9966 || reportId === 9962) {
-      delete cleanedFilters.IsSummary;
-      delete cleanedFilters.isSummary;
-    }
 
     console.log('Cleaned Filters:', cleanedFilters);
     onRunReport(cleanedFilters);

@@ -9,7 +9,10 @@ const DashboardLayout = ({ children }) => {
     <div className="admin-container">
       <Topbar />
       <div className="admin-body">
-        <Sidebar collapsed={sidebarCollapsed} onToggle={() => setSidebarCollapsed(!sidebarCollapsed)} />
+        <Sidebar 
+          collapsed={sidebarCollapsed} 
+          onToggle={() => setSidebarCollapsed(!sidebarCollapsed)} 
+        />
         <main className="admin-main-content">
           {children}
         </main>
