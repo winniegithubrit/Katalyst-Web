@@ -1,20 +1,13 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { FileText, ChevronLeft, ChevronRight, LayoutDashboard } from 'lucide-react';
+import { FileText, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const Sidebar = ({ collapsed = false, onToggle }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const isReportsActive = location.pathname.startsWith('/reports');
-  const isDashboardActive = location.pathname === '/dashboard' || location.pathname === '/';
 
   const navItems = [
-    {
-      id: 'dashboard',
-      label: 'Dashboard',
-      path: '/dashboard',
-      icon: LayoutDashboard,
-    },
     {
       id: 'reports',
       label: 'Reports',
@@ -28,7 +21,7 @@ const Sidebar = ({ collapsed = false, onToggle }) => {
       <nav className="admin-sidebar-nav">
         {navItems.map((item) => {
           const Icon = item.icon;
-          const isActive = item.id === 'dashboard' ? isDashboardActive : isReportsActive;
+          const isActive = item.id === 'reports' ? isReportsActive : false;
           return (
             <button
               key={item.id}
