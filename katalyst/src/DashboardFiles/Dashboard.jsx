@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import MembershipDashboard from './MembershipDashboard';
 import LoansDashboard from './LoansDashboard';
 import TransactionsDashboard from './TransactionsDashboard';
@@ -10,6 +11,7 @@ import { Users, CreditCard, ArrowLeftRight, LayoutDashboard } from 'lucide-react
 
 const Dashboard = () => {
   const { callApi, loading } = useSecureApi();
+  const navigate = useNavigate();
   const [analyticsData, setAnalyticsData] = useState(null);
   const [error, setError] = useState(null);
   const [currency, setCurrency] = useState('EUR');
@@ -134,6 +136,12 @@ const Dashboard = () => {
     }
   };
 
+  const handleDashboardClick = () => {
+    if (window.location.pathname !== '/dashboard') {
+      navigate('/dashboard');
+    }
+  };
+
   return (
     <div className="h-full flex flex-col">
       <div className="w-full overflow-x-auto whitespace-nowrap bg-white px-4 py-2 flex gap-1 items-end border-b">
@@ -144,10 +152,11 @@ const Dashboard = () => {
             return (
               <div
                 key={tab.path}
+                onClick={handleDashboardClick}
                 style={{
                   clipPath: 'polygon(10% 0%, 90% 0%, 100% 100%, 0% 100%)',
                 }}
-                className="flex items-center px-6 py-3 text-sm bg-white text-gray-800 font-semibold border-t border-l border-r border-gray-300"
+                className="flex items-center px-6 py-3 text-sm bg-white text-gray-800 font-semibold border-t border-l border-r border-gray-300 cursor-pointer hover:bg-gray-50 transition-colors"
               >
                 <Icon size={16} className="mr-2 text-blue-600" />
                 <span className="truncate">{tab.label}</span>
