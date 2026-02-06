@@ -27,7 +27,7 @@ const SavingsAccountStatement = ({ data, companyInfo, selectedBranch, submittedF
         accountNumber: firstRecord.AccountID || firstRecord.AccountNumber || '',
         accountName: firstRecord.AccountName || firstRecord.CustomerName || '',
         productName: firstRecord.ProductName || firstRecord.ProductDesc || 'N/A',
-        accountCurrency: firstRecord.AccountCurrency || firstRecord.Currency || 'UGX',
+        accountCurrency: firstRecord.AccountCurrency || firstRecord.Currency,
         openingBalance: parseFloat(firstRecord.OpeningBalance) || 0,
         availableBalance: parseFloat(firstRecord.AvailableBalance) || 0,
         freezedAmount: parseFloat(firstRecord.FreezedAmount) || 0,

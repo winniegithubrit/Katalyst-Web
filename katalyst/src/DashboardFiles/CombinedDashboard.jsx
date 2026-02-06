@@ -2,14 +2,6 @@ import React, { useState, useMemo } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line } from 'recharts';
 import { TrendingUp, Users, DollarSign, Building2, TrendingDown, Activity } from 'lucide-react';
 
-const formatCurrency = (num) => {
-  if (num === null || num === undefined) return 'KES 0';
-  if (num >= 1000000000) return `KES ${(num / 1000000000).toFixed(2)}B`;
-  if (num >= 1000000) return `KES ${(num / 1000000).toFixed(2)}M`;
-  if (num >= 1000) return `KES ${(num / 1000).toFixed(2)}K`;
-  return `KES ${num.toLocaleString()}`;
-};
-
 const formatNumber = (num) => {
   if (num === null || num === undefined) return '0';
   if (num >= 1000000000) return `${(num / 1000000000).toFixed(2)}B`;
@@ -18,9 +10,16 @@ const formatNumber = (num) => {
   return num.toLocaleString();
 };
 
-const CombinedDashboard = ({ analyticsData }) => {
+const CombinedDashboard = ({ analyticsData, currency = 'EUR' }) => {
   const [selectedCard, setSelectedCard] = useState(null);
 
+  const formatCurrency = (num) => {
+    if (num === null || num === undefined) return `${currency} 0`;
+    if (num >= 1000000000) return `${currency} ${(num / 1000000000).toFixed(2)}B`;
+    if (num >= 1000000) return `${currency} ${(num / 1000000).toFixed(2)}M`;
+    if (num >= 1000) return `${currency} ${(num / 1000).toFixed(2)}K`;
+    return `${currency} ${num.toLocaleString()}`;
+  };
   if (!analyticsData) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 p-8 flex items-center justify-center">

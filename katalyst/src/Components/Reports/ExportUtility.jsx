@@ -247,7 +247,7 @@ export const processSavingsDataForExport = (rawData) => {
     accountNumber: firstRecord.AccountID || firstRecord.AccountNumber || '',
     accountName: firstRecord.AccountName || firstRecord.CustomerName || '',
     productName: firstRecord.ProductName || '',
-    accountCurrency: firstRecord.AccountCurrency || firstRecord.Currency || 'UGX',
+    accountCurrency: firstRecord.AccountCurrency || firstRecord.Currency,
     openingBalance: parseFloat(firstRecord.OpeningBalance) || 0,
     availableBalance: parseFloat(firstRecord.AvailableBalance) || 0,
     freezedAmount: parseFloat(firstRecord.FreezedAmount) || 0,

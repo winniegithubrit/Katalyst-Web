@@ -19,7 +19,7 @@ const useSecureApi = () => {
       const baseUrl = import.meta.env.VITE_BASE_URL;
       const xApiKey = import.meta.env.VITE_X_API_KEY;
       const apiKey = import.meta.env.VITE_API_KEY;
-      const loginBaseUrl = import.meta.env.VITE_LOGIN_BASE_URL;
+      const loginBaseUrl = import.meta.env.VITE_LOGIN_BASE_URL 
 
       // Validate required environment variables
       if (!baseUrl || !xApiKey) {

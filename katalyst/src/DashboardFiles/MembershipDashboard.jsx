@@ -2,18 +2,18 @@ import React, { useState, useMemo } from 'react';
 import { LineChart, Line, PieChart, Pie, BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { TrendingUp, Users, UserPlus, DollarSign, Activity } from 'lucide-react';
 
-const formatCurrency = (num) => {
-  if (num === null || num === undefined) return 'KES 0';
-  if (num >= 1000000000) return `KES ${(num / 1000000000).toFixed(2)}B`;
-  if (num >= 1000000) return `KES ${(num / 1000000).toFixed(2)}M`;
-  if (num >= 1000) return `KES ${(num / 1000).toFixed(2)}K`;
-  return `KES ${num.toLocaleString()}`;
-};
-
 const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-const MembershipDashboard = ({ analyticsData }) => {
+const MembershipDashboard = ({ analyticsData, currency = 'EUR' }) => {
   const [selectedCard, setSelectedCard] = useState(null);
+
+  const formatCurrency = (num) => {
+    if (num === null || num === undefined) return `${currency} 0`;
+    if (num >= 1000000000) return `${currency} ${(num / 1000000000).toFixed(2)}B`;
+    if (num >= 1000000) return `${currency} ${(num / 1000000).toFixed(2)}M`;
+    if (num >= 1000) return `${currency} ${(num / 1000).toFixed(2)}K`;
+    return `${currency} ${num.toLocaleString()}`;
+  };
 
   if (!analyticsData) {
     return (
@@ -239,7 +239,7 @@ const MembershipDashboard = ({ analyticsData }) => {
           id="card4"
           title="Total Deposits"
           value={formatCurrency(totalMemberDeposits)}
-          subtitle="Member savings (KES)"
+          subtitle={`Member savings (${currency})`}
           icon={DollarSign}
           trend={true}
           trendValue={`${memberGrowthRate >= 0 ? '+' : ''}${memberGrowthRate}%`}

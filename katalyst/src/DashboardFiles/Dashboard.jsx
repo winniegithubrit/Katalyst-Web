@@ -13,6 +13,21 @@ const Dashboard = () => {
   const [analyticsData, setAnalyticsData] = useState(null);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('combined');
+  const [currency, setCurrency] = useState('EUR');
+
+  useEffect(() => {
+    localStorage.removeItem('currency');
+    sessionStorage.removeItem('currency');
+    const loginData = JSON.parse(localStorage.getItem('loginResponse') || '{}');
+    let currencyId = loginData?.bank?.currencyId;
+    if (!currencyId) {
+      currencyId = loginData?.currencyId;
+    }
+    if (!currencyId) {
+      currencyId = 'EUR';
+    }
+    setCurrency(currencyId);
+  }, []);
 
   useEffect(() => {
     const fetchAnalytics = async () => {
@@ -107,16 +122,16 @@ const Dashboard = () => {
     }
 
     switch (activeTab) {
-        case 'membership':
-        return <MembershipDashboard analyticsData={analyticsData} />;
-        case 'loans':
-        return <LoansDashboard analyticsData={analyticsData} />;
-        case 'transactions':
-        return <TransactionsDashboard analyticsData={analyticsData} />;
-        case 'combined':
-        default:
-        return <CombinedDashboard analyticsData={analyticsData} />;
-    }
+      case 'membership':
+      return <MembershipDashboard analyticsData={analyticsData} currency={currency} />;
+      case 'loans':
+      return <LoansDashboard analyticsData={analyticsData} currency={currency} />;
+      case 'transactions':
+      return <TransactionsDashboard analyticsData={analyticsData} currency={currency} />;
+      case 'combined':
+      default:
+      return <CombinedDashboard analyticsData={analyticsData} currency={currency} />;
+  }
     };
 
   return (

@@ -2,14 +2,6 @@ import React, { useState, useMemo } from 'react';
 import { LineChart, Line, PieChart, Pie, BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { TrendingUp, DollarSign, Activity, AlertCircle, ArrowUpDown } from 'lucide-react';
 
-const formatCurrency = (num) => {
-  if (num === null || num === undefined) return 'KES 0';
-  if (num >= 1000000000) return `KES ${(num / 1000000000).toFixed(2)}B`;
-  if (num >= 1000000) return `KES ${(num / 1000000).toFixed(2)}M`;
-  if (num >= 1000) return `KES ${(num / 1000).toFixed(2)}K`;
-  return `KES ${num.toLocaleString()}`;
-};
-
 const formatNumber = (num) => {
   if (num === null || num === undefined) return '0';
   if (num >= 1000000000) return `${(num / 1000000000).toFixed(2)}B`;
@@ -18,8 +10,16 @@ const formatNumber = (num) => {
   return num.toLocaleString();
 };
 
-const TransactionsDashboard = ({ analyticsData }) => {
+const TransactionsDashboard = ({ analyticsData, currency = 'EUR' }) => {
   const [selectedCard, setSelectedCard] = useState(null);
+
+  const formatCurrency = (num) => {
+    if (num === null || num === undefined) return `${currency} 0`;
+    if (num >= 1000000000) return `${currency} ${(num / 1000000000).toFixed(2)}B`;
+    if (num >= 1000000) return `${currency} ${(num / 1000000).toFixed(2)}M`;
+    if (num >= 1000) return `${currency} ${(num / 1000).toFixed(2)}K`;
+    return `${currency} ${num.toLocaleString()}`;
+  };
 
   if (!analyticsData) {
     return (
@@ -249,7 +249,7 @@ const TransactionsDashboard = ({ analyticsData }) => {
                   style={{ fontSize: '11px' }}
                   width={75}
                   tickFormatter={(value) => formatNumber(value)}
-                  label={{ value: 'KES', angle: -90, position: 'insideLeft', style: { textAnchor: 'middle', fill: '#6b7280', fontSize: '11px' } }}
+                  label={{ value: currency, angle: -90, position: 'insideLeft', style: { textAnchor: 'middle', fill: '#6b7280', fontSize: '11px'} }}
                 />
                 <Tooltip content={<CustomTooltip />} />
                 <Legend />
@@ -261,7 +261,7 @@ const TransactionsDashboard = ({ analyticsData }) => {
                   dot={{ fill: '#667eea', strokeWidth: 2, r: 3 }}
                   activeDot={{ r: 5, strokeWidth: 0 }}
                   fill="url(#colorVolume)"
-                  name="Volume (KES)"
+                  name={`Volume (${currency})`}
                 />
               </LineChart>
             </ResponsiveContainer>
