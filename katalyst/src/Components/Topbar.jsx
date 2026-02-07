@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { LogOut } from 'lucide-react';
 import { toast } from 'react-toastify';
 
@@ -17,7 +17,9 @@ const Topbar = () => {
   return (
     <header className="admin-topbar">
       <div className="admin-topbar-left">
-        <h1 className="admin-topbar-title">Katalyst</h1>
+        <Link to="/dashboard" className="admin-topbar-title-link">
+          <h1 className="admin-topbar-title">Katalyst</h1>
+        </Link>
       </div>
       <div className="admin-topbar-right">
         <button 
